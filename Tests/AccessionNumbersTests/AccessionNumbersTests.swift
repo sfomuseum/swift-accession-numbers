@@ -2,7 +2,7 @@ import XCTest
 @testable import AccessionNumbers
 
 final class AccessionNumbersTests: XCTestCase {
-
+    
     
     func testExample() throws {
         // This is an example of a functional test case.
@@ -14,21 +14,42 @@ final class AccessionNumbersTests: XCTestCase {
         let thisSourceFile = URL(fileURLWithPath: #file)
         let thisDirectory = thisSourceFile.deletingLastPathComponent()
         let url = thisDirectory.appendingPathComponent("TestData/aic.json")
-                                                               
-        print("POO")
-            print(url.absoluteString)
         
-        guard let data = try? Data(contentsOf: url) else {
-                    fatalError("Failed to load  from bundle.")
-                }
-
-                let decoder = JSONDecoder()
-
-                guard let loaded = try? decoder.decode([String: Organization].self, from: data) else {
-                    fatalError("Failed to decode from bundle.")
-                }
-
-                print(loaded)
+        var data: Data
+        var org: Organization
         
+        do {
+            data = try Data(contentsOf: url)
+        } catch (let error){
+            fatalError("Failed to load  from bundle, \(error).")
+        }
+        
+        let decoder = JSONDecoder()
+        
+        do {
+            org = try decoder.decode(Organization.self, from: data)
+        } catch (let error){
+            fatalError("Failed to load organization, \(error).")
+        }
+        
+        let an = AccessionNumbers(candidates: [org])
+             
+        for p in org.patterns {
+            
+            for (t, _) in p.tests {
+                
+                let rsp = an.ExtractFromTextWithPattern(text:t, pattern: p)
+                print(t, rsp)
+                
+                switch rsp {
+                case .failure(let error):
+                    fatalError("Failed to extract accession numbers from \(t), \(error).")
+                case .success(let results):
+                    let count = results.count
+                    print(count)
+                    // test against expected count here
+                }
+            }
+        }
     }
 }

@@ -1,20 +1,20 @@
 import Foundation
 
 public struct AccessionNumber: Codable {
-    var Organization: String
-    var Number: String
+    var organization: String
+    var number: String
 }
 
 public struct Pattern: Codable {
-    var Name: String
-    var Pattern: String
-    var Tests: [String:Int]
+    var name: String
+    var pattern: String
+    var tests: [String:Int]
 }
 
 public struct Organization: Codable {
-    var Name: String
-    var URL: String
-    var Patterns: [Pattern]
+    var name: String
+    var url: String
+    var patterns: [Pattern]
 }
 
 public struct AccessionNumbers {
@@ -48,7 +48,7 @@ public struct AccessionNumbers {
         
         var accession_numbers = [AccessionNumber]()
         
-        for p in organization.Patterns {
+        for p in organization.patterns {
             
             let rsp = self.ExtractFromTextWithPattern(text: text, pattern: p)
             
@@ -62,15 +62,15 @@ public struct AccessionNumbers {
         }
         return .success(accession_numbers)
     }
-
+    
     public func ExtractFromTextWithPattern(text: String, pattern: Pattern)  -> Result<[AccessionNumber], Error> {
         
         var accession_numbers = [AccessionNumber]()
-    
+        
         var re: NSRegularExpression
         
         do {
-            re = try NSRegularExpression(pattern: pattern.Pattern)
+            re = try NSRegularExpression(pattern: pattern.pattern)
         } catch (let error) {
             return .failure(error)
         }
@@ -81,7 +81,7 @@ public struct AccessionNumbers {
         
         for r in results {
             
-            let a = AccessionNumber(Organization: "", Number: r.debugDescription)                
+            let a = AccessionNumber(organization: "", number: r.debugDescription)
             accession_numbers.append(a)
         }
         
