@@ -1,8 +1,8 @@
 import Foundation
 
-public struct AccessionNumber: Codable {
+public struct Match: Codable {
     var organization: String
-    var number: String
+    var accession_number: String
 }
 
 public struct Pattern: Codable {
@@ -25,9 +25,9 @@ public struct AccessionNumbers {
         self.candidates = candidates
     }
     
-    public func ExtractFromText(text: String) -> Result<[AccessionNumber], Error> {
+    public func ExtractFromText(text: String) -> Result<[Match], Error> {
         
-        var accession_numbers = [AccessionNumber]()
+        var accession_numbers = [Match]()
         
         for org in self.candidates {
             
@@ -44,9 +44,9 @@ public struct AccessionNumbers {
         return .success(accession_numbers)
     }
     
-    public func ExtractFromTextWithOrganization(text: String, organization: Organization)  -> Result<[AccessionNumber], Error> {
+    public func ExtractFromTextWithOrganization(text: String, organization: Organization)  -> Result<[Match], Error> {
         
-        var accession_numbers = [AccessionNumber]()
+        var accession_numbers = [Match]()
         
         for p in organization.patterns {
             
@@ -56,34 +56,50 @@ public struct AccessionNumbers {
             case .failure(let error):
                 return .failure(error)
             case .success(let results):
-                // append org name here
-                accession_numbers.append(contentsOf: results)
+                
+                for var r in results {
+                    r.organization = organization.url
+                    accession_numbers.append(r)
+                }
             }
         }
+        
         return .success(accession_numbers)
     }
     
-    public func ExtractFromTextWithPattern(text: String, pattern: Pattern)  -> Result<[AccessionNumber], Error> {
+    public func ExtractFromTextWithPattern(text: String, pattern: Pattern)  -> Result<[Match], Error> {
         
-        var accession_numbers = [AccessionNumber]()
+        var accession_numbers = [Match]()
         
         var re: NSRegularExpression
         
         do {
-            re = try NSRegularExpression(pattern: pattern.pattern)
+            
+            // I am here trying to sort out multi-line, multi-word regular expressions...
+            
+            let p = "\\b\(pattern.pattern)\\b"
+            re = try NSRegularExpression(pattern: p)
         } catch (let error) {
             return .failure(error)
         }
         
         let range = NSRange(location: 0, length: text.utf16.count)
         
-        let results = re.matches(in: text, options: [], range: range)
+        let opts: NSRegularExpression.MatchingOptions = [ .withoutAnchoringBounds ]
+                
+        let matches = re.matches(in: text, options: opts, range: range)
         
-        for r in results {
-            
-            let a = AccessionNumber(organization: "", number: r.debugDescription)
-            accession_numbers.append(a)
-        }
+        if let match = matches.first {
+                let range = match.range(at:1)
+                if let swiftRange = Range(range, in: text) {
+                    let num = text[swiftRange]
+                    // Test num here...
+                    let m = Match(organization: "", accession_number: String(num))
+                    print("M \(m)")
+                    accession_numbers.append(m)
+                }
+            }
+    
         
         return .success(accession_numbers)
     }

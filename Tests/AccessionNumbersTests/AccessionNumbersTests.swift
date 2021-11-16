@@ -4,12 +4,7 @@ import XCTest
 final class AccessionNumbersTests: XCTestCase {
     
     
-    func testExample() throws {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct
-        // results.
-        // XCTAssertEqual(AccessionNumbers().text, "Hello, World!")
-        
+    func testExtractAccessionNumbers() throws {        
         
         let thisSourceFile = URL(fileURLWithPath: #file)
         let thisDirectory = thisSourceFile.deletingLastPathComponent()
@@ -36,19 +31,76 @@ final class AccessionNumbersTests: XCTestCase {
              
         for p in org.patterns {
             
-            for (t, _) in p.tests {
+            for (t, expected_count) in p.tests {
                 
                 let rsp = an.ExtractFromTextWithPattern(text:t, pattern: p)
-                print(t, rsp)
                 
                 switch rsp {
                 case .failure(let error):
                     fatalError("Failed to extract accession numbers from \(t), \(error).")
                 case .success(let results):
                     let count = results.count
-                    print(count)
-                    // test against expected count here
+                    
+                    if count != expected_count {
+                        
+                        fatalError("Unexpected count extracting text from \(t) with \(p.pattern). Expected \(expected_count) but got \(count)")
+                    }
                 }
+            }
+        }
+        
+        for p in org.patterns {
+            
+            for (t, expected_count) in p.tests {
+               
+                let rsp = an.ExtractFromTextWithOrganization(text: t, organization: org)
+                
+                switch rsp {
+                case .failure(let error):
+                    fatalError("Failed to extract accession numbers from \(t) for org, \(error).")
+                case .success(let results):
+                    let count = results.count
+                    
+                    if count != expected_count {
+                        
+                        fatalError("Unexpected count extracting text from \(t) with org. Expected \(expected_count) but got \(count)")
+                    }
+                }
+            }
+        }
+        
+        for p in org.patterns {
+            
+            for (t, _) in p.tests {
+                
+                let rsp = an.ExtractFromText(text: t)
+                
+                switch rsp {
+                case .failure(let error):
+                    fatalError("Failed to extract accession numbers from \(t), \(error).")
+                case .success(let results):
+                    let count = results.count
+                    
+                    if count == 0 {
+                        fatalError("Unexpected count extracting text from \(t). Got zero count.")
+                    }
+                }
+            }
+            
+            let label_text = "This is an object\nGift of Important Donor\nRX23664/89.115\n\nThis is another object\nAnonymouts Gift\nObj: 96681"
+            
+            let rsp = an.ExtractFromText(text: label_text)
+            
+            switch rsp {
+            case .failure(let error):
+                fatalError("Failed to extract accession numbers from label text, \(error).")
+            case .success(let results):
+                let count = results.count
+                
+                if count != 2 {
+                        fatalError("Failed to extract (2) accession numbers from label text")
+                }
+                
             }
         }
     }

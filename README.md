@@ -4,7 +4,9 @@ Swift package for extracting accession numbers from text using the sfomuseum/acc
 
 ## Important
 
-This is work in progress and does not actually _work_ yet.
+This is work in progress. It may still change and lacks documentation.
+
+To get started have a look at [Tests/AccessionNumbersTests/AccessionNumbersTests.swift](https://github.com/sfomuseum/swift-accession-numbers/blob/main/Tests/AccessionNumbersTests/AccessionNumbersTests.swift)
 
 ## See also
 
