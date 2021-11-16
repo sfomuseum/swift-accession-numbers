@@ -68,20 +68,58 @@ public struct AccessionNumbers {
     }
     
     public func ExtractFromTextWithPattern(text: String, pattern: Pattern)  -> Result<[Match], Error> {
-        
+                
         var accession_numbers = [Match]()
         
         var re: NSRegularExpression
         
         do {
-            
-            // I am here trying to sort out multi-line, multi-word regular expressions...
-            
-            let p = "\\b\(pattern.pattern)\\b"
+                        
+            let p = "\\.*?(pattern.pattern)"
             re = try NSRegularExpression(pattern: p)
         } catch (let error) {
             return .failure(error)
         }
+        
+        let with_text = text.replacingOccurrences(of: "\n", with: " ")
+        var buf = ""
+        
+        for char in with_text {
+            
+            if char == " " {
+                
+                let found = findMatches(text:buf, re: re)
+                
+                if found.count == 0 {
+                    buf = buf + String(char)
+                    continue
+                }
+                
+                for num in found {
+                    let m = Match(organization: "", accession_number: num)
+                    accession_numbers.append(m)
+                }
+                
+            } else {
+                buf = buf + String(char)
+            }
+        }
+        
+        if buf != "" {
+            
+            let found = findMatches(text:buf, re: re)
+            
+            for num in found {
+                let m = Match(organization: "", accession_number: num)
+                accession_numbers.append(m)
+            }
+            
+        }
+        
+        return .success(accession_numbers)
+    }
+    
+    private func findMatches(text: String, re: NSRegularExpression) -> [String] {
         
         let range = NSRange(location: 0, length: text.utf16.count)
         
@@ -89,19 +127,17 @@ public struct AccessionNumbers {
                 
         let matches = re.matches(in: text, options: opts, range: range)
         
+        var accession_numbers = [String]()
+        
         if let match = matches.first {
                 let range = match.range(at:1)
                 if let swiftRange = Range(range, in: text) {
                     let num = text[swiftRange]
-                    // Test num here...
-                    let m = Match(organization: "", accession_number: String(num))
-                    print("M \(m)")
-                    accession_numbers.append(m)
+                    accession_numbers.append(String(num))
                 }
-            }
-    
-        
-        return .success(accession_numbers)
+        }
+
+        return accession_numbers
     }
     
     
