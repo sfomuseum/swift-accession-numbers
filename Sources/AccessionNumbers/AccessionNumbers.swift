@@ -1,20 +1,20 @@
 import Foundation
 
 public struct Match: Codable {
-    var organization: String
-    var accession_number: String
+    public var organization: String
+    public var accession_number: String
 }
 
 public struct Pattern: Codable {
-    var name: String
-    var pattern: String
-    var tests: [String:Int]
+    public var name: String
+    public var pattern: String
+    public var tests: [String:Int]
 }
 
 public struct Organization: Codable {
-    var name: String
-    var url: String
-    var patterns: [Pattern]
+    public var name: String
+    public var url: String
+    public var patterns: [Pattern]
 }
 
 public struct AccessionNumbers {
