@@ -75,7 +75,7 @@ public struct AccessionNumbers {
         
         do {
                         
-            let p = "\\.*?(pattern.pattern)"
+            let p = "\\.*?\(pattern.pattern)"
             re = try NSRegularExpression(pattern: p)
         } catch (let error) {
             return .failure(error)
@@ -85,7 +85,7 @@ public struct AccessionNumbers {
         var buf = ""
         
         for char in with_text {
-            
+                        
             if char == " " {
                 
                 let found = findMatches(text:buf, re: re)
@@ -99,6 +99,8 @@ public struct AccessionNumbers {
                     let m = Match(organization: "", accession_number: num)
                     accession_numbers.append(m)
                 }
+                
+                buf = ""
                 
             } else {
                 buf = buf + String(char)
@@ -120,7 +122,7 @@ public struct AccessionNumbers {
     }
     
     private func findMatches(text: String, re: NSRegularExpression) -> [String] {
-        
+                
         let range = NSRange(location: 0, length: text.utf16.count)
         
         let opts: NSRegularExpression.MatchingOptions = [ .withoutAnchoringBounds ]

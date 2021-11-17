@@ -8,7 +8,7 @@ final class AccessionNumbersTests: XCTestCase {
         
         let thisSourceFile = URL(fileURLWithPath: #file)
         let thisDirectory = thisSourceFile.deletingLastPathComponent()
-        let url = thisDirectory.appendingPathComponent("TestData/aic.json")
+        let url = thisDirectory.appendingPathComponent("TestData/moma.json")
         
         var data: Data
         var org: Organization
@@ -43,7 +43,7 @@ final class AccessionNumbersTests: XCTestCase {
                     
                     if count != expected_count {
                         
-                        fatalError("Unexpected count extracting text from \(t) with \(p.pattern). Expected \(expected_count) but got \(count)")
+                        fatalError("Unexpected count extracting text from \(t) with \(p.pattern). Expected \(expected_count) but got \(count) : \(results)")
                     }
                 }
             }
@@ -87,7 +87,7 @@ final class AccessionNumbersTests: XCTestCase {
                 }
             }
             
-            let label_text = "This is an object\nGift of Important Donor\nRX23664/89.115\n\nThis is another object\nAnonymouts Gift\nObj: 96681"
+            let label_text = "This is an object\\nGift of Important Donor\\n302.2021.x1-x2\\n\\nThis is another object\\nAnonymouts Gift\\nPG731.2019 146.2020"
             
             let rsp = an.ExtractFromText(text: label_text)
             
@@ -97,8 +97,8 @@ final class AccessionNumbersTests: XCTestCase {
             case .success(let results):
                 let count = results.count
                 
-                if count != 2 {
-                        fatalError("Failed to extract (2) accession numbers from label text")
+                if count != 3 {
+                        fatalError("Failed to extract (2) accession numbers from label text \(results)")
                 }
                 
             }
