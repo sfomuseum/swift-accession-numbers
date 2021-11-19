@@ -8,7 +8,7 @@ final class AccessionNumbersTests: XCTestCase {
         
         let thisSourceFile = URL(fileURLWithPath: #file)
         let thisDirectory = thisSourceFile.deletingLastPathComponent()
-        let url = thisDirectory.appendingPathComponent("TestData/moma.json")
+        let url = thisDirectory.appendingPathComponent("TestData/sfomuseum.json")
         
         var data: Data
         var def: Definition
@@ -26,9 +26,7 @@ final class AccessionNumbersTests: XCTestCase {
         } catch (let error){
             fatalError("Failed to load organization, \(error).")
         }
-        
-        let definitions = [def]
-             
+                     
         for p in def.patterns {
 
             
@@ -101,6 +99,55 @@ final class AccessionNumbersTests: XCTestCase {
                 }
             }
 
+        }
+        
+        // Test Definition methods
+        
+        let num = "1994.18.165"
+        
+        let iiif_rsp = def.IIIFManifest(accession_number: num)
+        
+        switch iiif_rsp {
+        case .failure(let error):
+            fatalError("Failed to derive IIIF manifest URL for \(num), \(error)")
+        case .success(let url):
+
+            let str_uri = url.absoluteString
+            let expected_uri = "https://millsfield.sfomuseum.org/objects/1994.18.165/manifest"
+            
+            if  str_uri != expected_uri {
+                fatalError("Invalid IIIF URL, got '\(str_uri)' but expected \(expected_uri)")
+            }
+        }
+        
+        let oembed_rsp = def.OEmbedProfile(accession_number: num)
+        
+        switch oembed_rsp {
+        case .failure(let error):
+            fatalError("Failed to derive OEmbed profile URL for \(num), \(error)")
+        case .success(let url):
+
+            let str_uri = url.absoluteString
+            let expected_uri = "https://millsfield.sfomuseum.org/oembed/?url=https://millsfield.sfomuseum.org/objects/1994.18.165&format=json"
+            
+            if  str_uri != expected_uri {
+                fatalError("Invalid OEmbed profile URL, got '\(str_uri)' but expected \(expected_uri)")
+            }
+        }
+        
+        let object_rsp = def.ObjectURL(accession_number: num)
+        
+        switch object_rsp {
+        case .failure(let error):
+            fatalError("Failed to derive object URL for \(num), \(error)")
+        case .success(let url):
+
+            let str_uri = url.absoluteString
+            let expected_uri = "https://millsfield.sfomuseum.org/objects/1994.18.165"
+            
+            if  str_uri != expected_uri {
+                fatalError("Invalid object URL, got '\(str_uri)' but expected \(expected_uri)")
+            }
         }
     }
 }

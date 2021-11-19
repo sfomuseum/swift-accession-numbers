@@ -15,5 +15,3 @@ As of this writing this package recognizes accession numbers but is still not ab
 ## See also
 
 * https://github.com/sfomuseum/accession-numbers
-
-
