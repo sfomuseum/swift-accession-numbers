@@ -11,7 +11,7 @@ final class AccessionNumbersTests: XCTestCase {
         let url = thisDirectory.appendingPathComponent("TestData/moma.json")
         
         var data: Data
-        var org: Organization
+        var def: Definition
         
         do {
             data = try Data(contentsOf: url)
@@ -22,23 +22,31 @@ final class AccessionNumbersTests: XCTestCase {
         let decoder = JSONDecoder()
         
         do {
-            org = try decoder.decode(Organization.self, from: data)
+            def = try decoder.decode(Definition.self, from: data)
         } catch (let error){
             fatalError("Failed to load organization, \(error).")
         }
         
-        let an = AccessionNumbers(candidates: [org])
+        let definitions = [def]
              
-        for p in org.patterns {
+        for p in def.patterns {
+
             
-            for (t, expected_count) in p.tests {
+            for (t, expected_results) in p.tests {
+                                
+                let expected_count = expected_results.count
                 
-                let rsp = an.ExtractFromTextWithPattern(text:t, pattern: p)
+                if expected_count == 0 {
+                    continue
+                }
+                
+                let rsp = ExtractFromTextWithPattern(text:t, pattern: p)
                 
                 switch rsp {
                 case .failure(let error):
                     fatalError("Failed to extract accession numbers from \(t), \(error).")
                 case .success(let results):
+                    
                     let count = results.count
                     
                     if count != expected_count {
@@ -49,11 +57,17 @@ final class AccessionNumbersTests: XCTestCase {
             }
         }
         
-        for p in org.patterns {
+        for p in def.patterns {
             
-            for (t, expected_count) in p.tests {
+            for (t, expected_results) in p.tests {
                
-                let rsp = an.ExtractFromTextWithOrganization(text: t, organization: org)
+                let expected_count = expected_results.count
+                
+                if expected_count == 0 {
+                    continue
+                }
+                
+                let rsp = ExtractFromTextWithDefinition(text: t, definition: def)
                 
                 switch rsp {
                 case .failure(let error):
@@ -69,11 +83,11 @@ final class AccessionNumbersTests: XCTestCase {
             }
         }
         
-        for p in org.patterns {
+        for p in def.patterns {
             
             for (t, _) in p.tests {
                 
-                let rsp = an.ExtractFromText(text: t)
+                let rsp = ExtractFromText(text: t, definitions: [def])
                 
                 switch rsp {
                 case .failure(let error):
@@ -86,22 +100,7 @@ final class AccessionNumbersTests: XCTestCase {
                     }
                 }
             }
-            
-            let label_text = "This is an object\\nGift of Important Donor\\n302.2021.x1-x2\\n\\nThis is another object\\nAnonymouts Gift\\nPG731.2019 146.2020"
-            
-            let rsp = an.ExtractFromText(text: label_text)
-            
-            switch rsp {
-            case .failure(let error):
-                fatalError("Failed to extract accession numbers from label text, \(error).")
-            case .success(let results):
-                let count = results.count
-                
-                if count != 3 {
-                        fatalError("Failed to extract (2) accession numbers from label text \(results)")
-                }
-                
-            }
+
         }
     }
 }
