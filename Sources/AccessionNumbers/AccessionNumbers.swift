@@ -93,8 +93,8 @@ public func ExtractFromText(text: String, definitions: [Definition]) -> Result<[
         let rsp = ExtractFromTextWithDefinition(text: text, definition: def)
         
         switch rsp {
-        case .failure(let error):
-            return .failure(error)
+        case .failure(_):
+            ()
         case .success(let results):
             accession_numbers.append(contentsOf: results)
         }
