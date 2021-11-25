@@ -22,39 +22,51 @@ public enum DefinitionError: Error {
 public struct Definition: Codable {
     public var organization_name: String
     public var organization_url: String
-    public var iiif_manifest: String
-    public var oembed_profile: String
-    public var object_url: String
-    public var whosonfirst_id: Int64
+    public var iiif_manifest: String?
+    public var oembed_profile: String?
+    public var object_url: String?
+    public var whosonfirst_id: Int64?
     public var patterns: [Pattern]
         
     public func IIIFManifest(accession_number: String) -> Result<URL, Error> {
+        
+        if self.iiif_manifest == nil {
+            return .failure(DefinitionError.noIIIFTemplate)
+        }
         
         if self.iiif_manifest == "" {
             return .failure(DefinitionError.noIIIFTemplate)
         }
         
-        let t = URITemplate(template: self.iiif_manifest)
+        let t = URITemplate(template: self.iiif_manifest!)
         return self.expandURITemplate(template: t, accession_number: accession_number)
     }
     
     public func OEmbedProfile(accession_number: String) -> Result<URL, Error> {
         
+        if self.oembed_profile == nil {
+            return .failure(DefinitionError.noOEmbedProfileTemplate)
+        }
+        
         if self.oembed_profile == "" {
             return .failure(DefinitionError.noOEmbedProfileTemplate)
         }
         
-        let t = URITemplate(template: self.oembed_profile)
+        let t = URITemplate(template: self.oembed_profile!)
         return self.expandURITemplate(template: t, accession_number: accession_number)
     }
     
     public func ObjectURL(accession_number: String) -> Result<URL, Error> {
         
+        if self.object_url == nil {
+            return .failure(DefinitionError.noObjectURLTemplate)
+        }
+        
         if self.object_url == "" {
             return .failure(DefinitionError.noObjectURLTemplate)
         }
         
-        let t = URITemplate(template: self.object_url)
+        let t = URITemplate(template: self.object_url!)
         return self.expandURITemplate(template: t, accession_number: accession_number)
     }
 
